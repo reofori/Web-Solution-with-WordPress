@@ -85,7 +85,8 @@ By the end of this project, I’ll have a deeper understanding of deploying a **
 ssh ec2-user@<Public-IP>
 ```
 
-![instance](images/connect%20instance.png)
+![instance](images/connect%20intance.png)
+
 ![instance](images/ssh.png)
 
 
@@ -150,29 +151,27 @@ df -h
     - Enter the Correct Type Code
     - To confirm that the partition type has been changed, use the p command again to print the partition table:
 
-    ![](img/fixing%20error.png)
+    ![instance](images/ssh5.png)
 
 8. View the Partitions
 - After partitioning, view the newly created partitions using:
 ```bash
 lsblk
 ```
-
-![](img/view%20newly%20created%20partitions.png)
+![instance](images/ssh6.png)
 
 9. Install LVM
 - Install the `lvm2` package:
 ```bash
 sudo yum install lvm2
 ```
-![](img/install%20lvm2.png)
+![instance](images/ssh7.png)
 
 - Check available partitions with `lvmdiskscan`
 ```bash
 sudo lvmdiskscan
 ```
-
-![](img/lvmdiskscan.png)
+![instance](images/ssh8.png)
 
 >For Redhat we use `yum` as the package manager, while Ubuntu uses `apt`.
 
@@ -187,9 +186,6 @@ sudo pvcreate /dev/xvdd1 /dev/xvde1 /dev/xvdf1
 sudo pvs
 ```
 
-![](img/creating%20physical%20volumes.png)
-
-
 11. Create a Volume Group
 - Use `vgcreate` to combine the physical volumes into a single volume group named `webdata-vg`:
 ```bash
@@ -199,7 +195,8 @@ sudo vgcreate webdata-vg /dev/xvdd1 /dev/xvde1 /dev/xvdf1
 ```bash
 sudo vgs
 ```
-![](img/volume%20group.png)
+![instance](images/ssh10.png)
+
 
 12. Create Logical Volumes
 - Create two logical volumes:
@@ -215,8 +212,7 @@ sudo vgs
 ```bash
 sudo lvs
 ```
-
-![](img/logical%20volumes.png)
+![instance](images/ssh11.png)
 
 13. Verify the entire setup
  - use:
@@ -224,8 +220,8 @@ sudo lvs
  sudo vgdisplay -v #view complete setup - VG, PV, and LV
  sudo lsblk
  ```
- 
- ![](img/verify%20the%20entire%20setup.png)
+![instance](images/ssh12.png)
+
 
 14. Format the Logical Volumes
 - Format both logical volumes with the ext4 filesystem:
@@ -233,7 +229,8 @@ sudo lvs
 sudo mkfs -t ext4 /dev/webdata-vg/apps-lv
 sudo mkfs -t ext4 /dev/webdata-vg/logs-lv
 ```
-![](img/formating%20lv%20to%20ext4%20fs.png)
+![instance](images/ssh13.png)
+
 
 15. Create Directories
 - Create a directory for website files:
@@ -254,7 +251,8 @@ sudo mount /dev/webdata-vg/apps-lv /var/www/html/
 ```bash
 sudo rsync -av /var/log/ /home/recovery/logs/
 ```
-![](img/directory%201.png)
+![instance](images/ssh14.png)
+
 
 - Mount the logical volume for logs ( Note, all existing data on /var/log will be deleted. That is why it is important to back it up.):
 ```bash
@@ -264,8 +262,7 @@ sudo mount /dev/webdata-vg/logs-lv /var/log/
 ```bash 
 sudo rsync -av /home/recovery/logs/ /var/log/
 ```
-
-![](img/directory%202.png)
+![instance](images/ssh15.png)
 
 
 17. Configure Persistent Mounts
@@ -274,8 +271,7 @@ sudo rsync -av /home/recovery/logs/ /var/log/
 ```bash
 sudo blkid
 ```
-
-![](img/uuid.png)
+![instance](images/ssh16.png)
 
 > Locate the UUID of apps-lv and logs-lv
 
@@ -290,10 +286,8 @@ sudo vi /etc/fstab
 UUID=<UUID-of-apps-lv> /var/www/html ext4 defaults 0 0
 UUID=<UUID-of-logs-lv> /var/log ext4 defaults 0 0
 ``` 
-
-
-
-![](img/vi%20uuid%20modify.png)
+![instance](images/ssh18.png)
+![instance](images/ssh17.png)
 
 
 18. Reload and Verify Setup
@@ -306,12 +300,29 @@ sudo systemctl daemon-reload
 ```bash
 df -h
 ```
-![](img/verify%20set%20up%20again.png)
+![instance](images/ssh19.png)
 > You should see both /var/www/html and /var/log mounted on your logical volumes.
 
 ## Step 2: Prepare the Database Server
 1. Launch EC2 Instance
     - Start a new RedHat EC2 instance that will serve as your DB Server.
+![instance](images/DB%20server.png)
+
+**Connect to the Instance**:
+   - Use windows terminal to connect to the instance via SSH.
+   - 
+8. **SSH to the instance**
+ Note: for Ubuntu server, when connecting to it via SSH/Putty or any other tool, we used ubuntu user, but for RedHat you will need to use ec2-user user.
+Connection string will look like ec2-user@<Public-IP>
+```
+ssh -i "steghub.pem" ec2-user@16.170.143.75
+```
+![instance](images/ssh20.png)
+
+Repeat the same steps as for the Web Server, but instead of appslv create db-lv and mount it to /db directory instead of /var/www/html/.
+**". Create 3 volumes in the same AZ as your Web Server EC2, each of 10 GiB.**
+![instance](images/dbserver1.png)
+![instance](images/dbvolumeng)
 
 2. Set Up Storage Infrastructure
     - Repeat the storage steps from Step 1 of the Web Server setup, but this time
@@ -330,9 +341,10 @@ df -h
         df -h
         ```
 
-        ![](img/verify%20db%20server.png)
+       ![instance](images/ssh30.png)
 
         > You should see both /db and /var/log mounted on your logical volumes.
+        > 
 ## Step 3: Install WordPress on Your Web Server EC2
 
 1. Update Package Repository
@@ -340,15 +352,14 @@ df -h
 ```bash
 sudo yum -y update
 ```
-![](img/yum%20update.png)
+![instance](images/ssh31.png)
 
 2. Install wget, Apache, PHP, and Dependencies
 - Install required packages:
 ```bash
  sudo yum -y install wget httpd php php-mysqlnd php-fpm php-json
 ```
-
-![](img/install%20wget%20apache%20and%20co.png)
+![instance](images/ssh32.png)
 
 
 3. Start Apache
@@ -357,7 +368,7 @@ sudo yum -y update
 sudo systemctl enable httpd
 sudo systemctl start httpd
 ```
-![](img/start%20httpd.png)
+![instance](images/ssh33.png)
 
 4. Install PHP and Dependencies
 - Install additional PHP dependencies:
@@ -371,7 +382,6 @@ sudo yum install php php-opcache php-gd php-curl php-mysqlnd
 sudo systemctl start php-fpm
 sudo systemctl enable php-fpm
 ```
-![](img/install%20php%20and%20dependencies.png)
 
 5. Configure Apache for PHP
 - Allow Apache to execute PHP code:
@@ -399,7 +409,7 @@ sudo systemctl restart httpd
         ```bash
         sudo tar -xzvf latest.tar.gz
         ```
-        ![](img/wordpress%20download.png)
+       
     5. Remove the Compressed Archive: Clean up your workspace by removing the downloaded latest.tar.gz file since it’s no longer needed after extraction.
         ```bash
         sudo rm -rf latest.tar.gz
@@ -433,7 +443,8 @@ sudo systemctl restart httpd
 sudo yum update
 sudo yum install mysql-server
 ```
-![](img/install%20mysql-server.png)
+![instance](images/ssh40.png)
+![instance](images/ssh41.png)
 
 2. Start MySQL Service
 - Enable and start the MySQL service:
@@ -446,7 +457,7 @@ sudo systemctl start mysqld
 ```bash
 sudo systemctl status mysqld
 ```
-![](img/verify%20mysql-status.png)
+![instance](images/ssh42.png)
 
 
 ## Step 5: Configure the Database for WordPress
@@ -465,12 +476,12 @@ FLUSH PRIVILEGES;
 SHOW DATABASES;
 exit;
 ```
-![](img/create%20database%20for%20wp.png)
+![instance](images/ssh43.png)
 
 3. Open MySQL Port (3306)
 - Modify the inbound rules for the DB server security group to allow MySQL connections (port 3306) only from the Web Server's private IP. For extra security, restrict access using /32 CIDR notation.
 
-![](img/inbound%20rules.png)
+![instance](images/dbserversg.png)
 
 
 ## Step 6: Configure WordPress to Connect to the Remote Database
@@ -487,7 +498,7 @@ sudo mysql -u myuser -p -h <DB-Server-Private-IP-Address>
 ```sql
 SHOW DATABASES;
 ```
-![](img/show%20databases.png)
+![instance](images/ssh44.png)
 
 3. Edit WordPress Configuration
 
@@ -515,12 +526,12 @@ Here, WordPress will walk you through the final setup steps, including:
 Once you fill in these details, click Install WordPress.
 
 
-![](img/browser%20wp1.png)
+![instance](images/wordpress%20final.png)
 
 
 If it shows the above, the configuration on`/var/www/html/wordpress/wp-config.php` was successful.
 
-![](img/browser%20wp2.png)
+![instance](images/wordpress%20final1.png)
 
 ---
 
