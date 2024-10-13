@@ -28,6 +28,7 @@ Web and mobile solutions are often structured using a **three-tier architecture*
 By implementing this three-tier setup, I’ll gain valuable hands-on experience that mirrors how large-scale applications are structured, with a clear separation between user interaction, application processing, and data storage. The practical exposure to **disk partitioning** using `gdisk` and **volume management** with `LVM` further enhances my understanding of managing storage subsystems for both web and database servers.
 
 ### My Three-tier Setup
+![instance](images/3%20tier.png)
 
 For this project, I’ll be working with:
 
@@ -68,23 +69,24 @@ By the end of this project, I’ll have a deeper understanding of deploying a **
 1. Launch EC2 Instance:
 - Start by launching an EC2 instance that will serve as the web server for WordPress. Make sure the instance uses RedHat and is in the same Availability Zone (AZ) as the volumes you will create.
 
-![](img/new%20instance.png)
+![instance](images/instance.png)
 
 2. Create EBS Volumes:
 - Create three (3) EBS volumes, each with a size of 10 GiB in the same AZ as your EC2 instance.
 
-![](img/create%20volumes.png)
-
 3. Attach EBS Volumes
 - Attach the three volumes one by one to your EC2 web server instance. You can do this from the AWS Management Console by selecting the instance and attaching the newly created volumes.
 
-![](img/attach%20volume.png)
-![](img/attach%20volume%202.png)
+![instance](images/attach%20volume.png)
+![instance](images/attach%20volume1.png)
 
 4. SSH into your instance through your terminal
  ```bash
 ssh ec2-user@<Public-IP>
 ```
+
+![instance](images/connect%20instance.png)
+![instance](images/ssh.png)
 
 
 5. Inspect Block Devices
@@ -92,21 +94,21 @@ ssh ec2-user@<Public-IP>
 ```bash
 lsblk
 ```
-![](img/inspect%20block%20devices.png)
+![instance](images/ssh1.png)
 
 - Check for the newly attached volumes. As seen above as /dev/xvdd, /dev/xvde, and /dev/xvdf.
 - Alternatively, use:
 ```bash
 ls /dev/
 ```
-![](img/ls%20dev.png)
+![instance](images/ssh2.png)
 
 6. Check Disk Space
 - Run the following command to view all mounted filesystems and their free space:
 ```bash
 df -h
-```
-![](img/see%20free%20space.png)
+``
+![instance](images/ssh3.png)
 
 7. Partition the Disks
 - Use `gdisk` to create a partition on each of the disks:
@@ -121,9 +123,12 @@ df -h
     - Press `w` to write the changes.
     - Confirm the action by typing yes when asked to proceed.
 
-    At this point, the partition has been created, and gdisk will exit: 
+    At this point, the partition has been created, and gdisk will exit:
+    ```bash
+    sudo gdisk /dev/
+    ```
+   ![instance](images/ssh4.png)
 
-    ![](img/using%20gdisk.png)
     6. Repeat the above process for the Other Disks:
 
     ```bash
