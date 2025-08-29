@@ -11,7 +11,7 @@
     - When partitioning the disk `/dev/xvdd`, I created a new partition for the web application using the `8E00` type for **Linux LVM**.
 
 - **LVM (Logical Volume Management)**:
-  - LVM allows me to manage disk space more flexibly than traditional partitions by creating **physical volumes**, **volume groups**, and **logical volumes**. With LVM, I can resize volumes, create snapshots, or combine multiple physical disks into one logical unit.
+  - LVM allows me to manage disk space more flexibly than traditional partitions by creating **physical volumes**, **volume groups**, and **logical volumes**. With LVM, I can resize volumes, create snapshots, or combine multiple physical disks into one logical unit..
   - **Example**:
     - After partitioning, I turned the partition into a physical volume (`pvcreate`), added it to a volume group (`vgcreate`), and created logical volumes (`lvcreate`) for the application and logs.
 
