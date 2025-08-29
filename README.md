@@ -27,7 +27,7 @@ Web and mobile solutions are often structured using a **three-tier architecture*
 
 By implementing this three-tier setup, I’ll gain valuable hands-on experience that mirrors how large-scale applications are structured, with a clear separation between user interaction, application processing, and data storage. The practical exposure to **disk partitioning** using `gdisk` and **volume management** with `LVM` further enhances my understanding of managing storage subsystems for both web and database servers.
 
-### My Three-tier Setup
+### My Three-tier Setup.
 ![instance](images/3%20tier.png)
 
 For this project, I’ll be working with:
